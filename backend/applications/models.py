@@ -20,6 +20,9 @@ class Category(db.Model):
     name = db.Column(db.String(80),nullable=False)
     products = db.relationship('Product', backref='category',cascade = "all, delete-orphan",lazy=True) #when parent is deleted, child is deleted
 
+    def convert_to_json(self):
+        return {"id":self.id,"name":self.name}
+
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80),nullable=False)
@@ -30,6 +33,16 @@ class Product(db.Model):
     sold = db.Column(db.Integer, nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
     Cart = db.relationship('Cart', backref='products',cascade = "all, delete-orphan",lazy=True) #when parent is deleted, child is deleted
+
+    def convert_to_json(self):
+        return {"id":self.id,
+                "name":self.name,
+                "description":self.description,
+                "price":self.price,
+                "unit":self.unit,
+                "stock":self.stock,
+                "sold":self.sold,
+                "category_id":self.category_id}
 
 class Cart(db.Model):
     id = db.Column(db.Integer, primary_key=True)
