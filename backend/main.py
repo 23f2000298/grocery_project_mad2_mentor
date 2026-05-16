@@ -2,7 +2,11 @@ from flask import Flask
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
 from applications.models import db, Users
-from applications.api import WelcomeAPI,SignupAPI,LoginAPI,CategoryAPI
+from applications.api import WelcomeAPI
+from applications.auth_api import SignupAPI,AuthAPI
+from applications.category_api import CategoryAPI
+from applications.product_api import ProductAPI
+from applications.cart_api import CartAPI
 import os
 from datetime import timedelta
 
@@ -35,8 +39,10 @@ def add_admin():
 
 api.add_resource(WelcomeAPI,"/api/welcome")
 api.add_resource(SignupAPI,"/api/signup")
-api.add_resource(LoginAPI,"/api/login")
+api.add_resource(AuthAPI,"/api/login","/api/manager","/api/manager/<int:manager_id>")
 api.add_resource(CategoryAPI,"/api/category","/api/category/<int:category_id>")
+api.add_resource(ProductAPI,"/api/product","/api/product/<int:product_id>")
+api.add_resource(CartAPI,"/api/cart","/api/cart/<int:cart_id>")
 
 if __name__ == '__main__':
     db.create_all()

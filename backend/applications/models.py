@@ -13,7 +13,15 @@ class Users(db.Model):
     role = db.Column(db.String(120), nullable=False,default="customer")
     status = db.Column(db.String(120), nullable=False,default="active")
     carts = db.relationship('Cart', backref='users',cascade = "all, delete-orphan",lazy=True) #when parent is deleted, child is deleted
+    products = db.relationship('Product', backref='users',cascade = "all, delete-orphan",lazy=True) #when parent is deleted, child is deleted
     category_requests = db.relationship('CategoryRequest', backref='users',cascade = "all, delete-orphan",lazy=True) #when parent is deleted, child is deleted
+
+    def convert_to_json(self):
+        return {"id":self.id,
+                "name":self.name,
+                "email":self.email,
+                "role":self.role,
+                "status":self.status}
 
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -28,11 +36,12 @@ class Product(db.Model):
     name = db.Column(db.String(80),nullable=False)
     description = db.Column(db.String(),nullable=False)
     price = db.Column(db.Integer, nullable=False)
-    unit = db.Column(db.String(80),nullable=False)
+    unit = db.Column(db.Integer,nullable=False)
     stock = db.Column(db.Integer, nullable=False)
     sold = db.Column(db.Integer, nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
-    Cart = db.relationship('Cart', backref='products',cascade = "all, delete-orphan",lazy=True) #when parent is deleted, child is deleted
+    manager_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    carts = db.relationship('Cart', backref='products',cascade = "all, delete-orphan",lazy=True) #when parent is deleted, child is deleted
 
     def convert_to_json(self):
         return {"id":self.id,
@@ -50,6 +59,14 @@ class Cart(db.Model):
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
 
+    def convert_to_json(self):
+        return {"id":self.id,
+                "quantity":self.quantity,
+                "product_id":self.product_id,
+                "product_name":self.products.name,
+                "product_price":self.products.price,
+                "product_unit":self.products.unit,
+                "product_description":self.products.description}
 class Orders(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     customer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
