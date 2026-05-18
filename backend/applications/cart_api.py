@@ -41,7 +41,7 @@ class CartAPI(Resource):
         if not (data.get("product_id") and data.get("quantity")):
             return {"message": "Missing required fields"}, 400
 
-        cart_product = Cart.query.filter_by(customer_id = current_user.get("user_id"),product_id=data.get("product_id")).first()
+        cart_product = Cart.query.filter_by(customer_id=current_user, product_id=data.get("product_id")).first()
         if not cart_product:
             product = Product.query.get(data.get("product_id"))
             if not product:

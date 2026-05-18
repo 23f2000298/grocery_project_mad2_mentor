@@ -5,7 +5,7 @@ from applications.models import db, Users
 from applications.api import WelcomeAPI,cache
 from applications.auth_api import SignupAPI,AuthAPI
 from applications.category_api import CategoryAPI
-from applications.product_api import ProductAPI
+from applications.product_api import ProductAPI,ExportDataAPI
 from applications.cart_api import CartAPI
 from applications.purchase_api import PurchaseAPI
 from applications.category_request_api import CategoryRequestAPI,CategoryApprovial
@@ -20,7 +20,7 @@ base_dir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(base_dir, "database.db")
 app.config["SECRET_KEY"] = "super-secret"
-app.config["JWT_SECRET_KEY"] = "super-secret"
+app.config["JWT_SECRET_KEY"] = "my-super-secret-key-that-is-long-enough-123"
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours = 12)
 
 app.config["CACHE_TYPE"] = "redis"
@@ -72,6 +72,7 @@ api.add_resource(CartAPI,"/api/cart","/api/cart/<int:cart_id>")
 api.add_resource(PurchaseAPI,"/api/order")
 api.add_resource(CategoryRequestAPI,"/api/category/request")
 api.add_resource(CategoryApprovial,"/api/category/request/action")
+api.add_resource(ExportDataAPI,"/api/product/export")
     
     
 

@@ -61,6 +61,7 @@ class PurchaseAPI(Resource):
 
             db.session.add(new_order)
             db.session.delete(product)
+            product.products.sold += product.quantity
 
         db.session.commit()
 

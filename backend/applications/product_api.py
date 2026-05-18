@@ -1,8 +1,9 @@
 from flask import request,current_app as app
 from flask_restful import Resource
 from flask_jwt_extended import create_access_token,jwt_required,get_jwt_identity,get_jwt
-from .models import db,Product,Category
+from .models import db,Product,Category,Users
 from .api import cache
+from .task import data_export
 
 
 
@@ -17,7 +18,7 @@ class ProductAPI(Resource):
         claims = get_jwt()
 
         if claims.get("role")  == "manager":
-            products = Product.query.filter_by(manager_id=current_user.get("user_id")).all()
+            products = Product.query.filter_by(manager_id=current_user).all()
         else:
             products = Product.query.all()
 
@@ -78,8 +79,7 @@ class ProductAPI(Resource):
 
         if not category:
             return {"message": "Category not found"}, 404
-        product = Product.query.filter_by(id=product_id,manager_id=current_user.get("user_id")).first()
-
+        product = Product.query.filter_by(id=product_id,manager_id=current_user).first()
         if not product:
             return {"message": "Product not found"}, 404
 
@@ -105,8 +105,7 @@ class ProductAPI(Resource):
         if claims.get("role") != "manager":
             return {"message": "access denied"}, 403
 
-        product = Product.query.filter_by(id=category_id,manager_id=current_user.get("user_id")).first()
-
+        product = Product.query.filter_by(id=category_id,manager_id=current_user).first()
         if not product:
             return {"message": "Product not found"}, 404
 
@@ -116,5 +115,24 @@ class ProductAPI(Resource):
         return {"message": "Product deleted successfully"}, 200
 
        
+class ExportDataAPI(Resource):
+    @jwt_required()
+    def get(self):
+        current_user = get_jwt_identity()
+
+        claims = get_jwt()
+
+        if claims.get("role") != "manager":
+            return {"message": "access denied"}, 403
+
+        products = Product.query.filter_by(manager_id=current_user).all()
+        manager = Users.query.filter_by(id=current_user).first()
+        if manager:
+            product_details = []
+            for product in products:
+                product_details.append({"product_id": product.id,"quantity": product.stock,"date_of_purchase": product.date_of_purchase,"name": product.name,"price": product.price,"unit": product.unit})
+            data_export(product_details,manager.email)
+            return {"message": "Data exported successfully, please check your email"}, 200
 
 
+        

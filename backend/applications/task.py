@@ -5,9 +5,13 @@ from celery.schedules import crontab
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email import encoders
+import csv
+import os
 
 
-def send_mail(email,subject,email_content):
+def send_mail(email,subject,email_content,attachment = None):
     smtp_server_host = "localhost"
     smtp_port = 1025
     sender_email = "admin@gmail.com"
@@ -19,6 +23,18 @@ def send_mail(email,subject,email_content):
     msg["Subject"] = subject
 
     msg.attach(MIMEText(email_content,"html"))
+
+
+    if attachment:
+        with open(attachment,"rb") as attachment_content:
+            part = MIMEBase("application","octet-stream")
+            part.set_payload(attachment_content.read())
+            encoders.encode_base64(part)
+        # part.add_header("Content-Disposition","attachment; filename = %s" % os.path.basename())     
+        print(os.path.basename(attachment))
+        part.add_header("Content-Disposition", f'attachment; filename="{os.path.basename(attachment)}"')
+        msg.attach(part)
+         
 
     server = smtplib.SMTP(host =smtp_server_host,port = smtp_port)
     server.login(sender_email,sender_password)
@@ -40,6 +56,10 @@ def setup_periodic_tasks(sender,**kwargs):
     sender.add_periodic_task(10.0,daily_remainder,name="daily remainder at 10 am")
 
     sender.add_periodic_task(crontab(hour = 8, minute = 0),daily_remainder,name = "daily remainder at 8 am")
+
+
+    sender.add_periodic_task(crontab(day_of_month="1",month_of_year="*"),monthly_report.s(),name = "monthly report at 1st of every month")
+
 @celery.task
 def test(arg):
     print(arg)
@@ -70,5 +90,16 @@ def monthly_report():
         html_report = get_html_report(username = customer.name,data = orders_detail)
         send_mail(email = customer.email,subject="Monthly Report",email_content=html_report)
 
-    print("email sent")
-    
+    print("Report sent")
+
+
+@celery.task
+def data_export(product_details,email):
+    with open("data_export.csv","w",newline="") as csvfile:
+        filenames = ["product_id","quantity","date_of_purchase","name","price","unit"]
+        writer = csv.DictWriter(csvfile,fieldnames=filenames)
+        writer.writeheader()
+        writer.writerows(product_details)
+    send_mail(email = email,email_content="Please find the attachment",subject="Product Data Export",attachment="data_export.csv")
+
+    return "Data exported successfully"
