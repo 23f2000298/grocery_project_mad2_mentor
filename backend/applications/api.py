@@ -3,6 +3,11 @@ from flask_restful import Resource
 from flask_jwt_extended import create_access_token,jwt_required,get_jwt_identity,get_jwt
 from .models import Users,db,Orders,Cart,Product,Category,CategoryRequest
 
+from flask_caching import Cache
+import time
+
+cache = Cache()
+
 
 
 class WelcomeAPI(Resource):

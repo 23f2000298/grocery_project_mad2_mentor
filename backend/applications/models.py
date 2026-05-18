@@ -12,9 +12,11 @@ class Users(db.Model):
     password = db.Column(db.String(120), nullable=False)
     role = db.Column(db.String(120), nullable=False,default="customer")
     status = db.Column(db.String(120), nullable=False,default="active")
-    carts = db.relationship('Cart', backref='users',cascade = "all, delete-orphan",lazy=True) #when parent is deleted, child is deleted
-    products = db.relationship('Product', backref='users',cascade = "all, delete-orphan",lazy=True) #when parent is deleted, child is deleted
-    category_requests = db.relationship('CategoryRequest', backref='users',cascade = "all, delete-orphan",lazy=True) #when parent is deleted, child is deleted
+    carts = db.relationship('Cart', backref='users',cascade = "all, delete-orphan",lazy=True)
+    products = db.relationship('Product', backref='users',cascade = "all, delete-orphan",lazy=True)
+    category_requests = db.relationship('CategoryRequest', backref='users',cascade = "all, delete-orphan",lazy=True)
+    orders = db.relationship('Orders', backref='users',cascade = "all, delete-orphan",lazy=True)
+    categories = db.relationship('Category', backref='users',cascade = "all, delete-orphan",lazy=True)  # added
 
     def convert_to_json(self):
         return {"id":self.id,
@@ -26,10 +28,11 @@ class Users(db.Model):
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80),nullable=False)
-    products = db.relationship('Product', backref='category',cascade = "all, delete-orphan",lazy=True) #when parent is deleted, child is deleted
+    manager_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)  # added
+    products = db.relationship('Product', backref='category',cascade = "all, delete-orphan",lazy=True)
 
     def convert_to_json(self):
-        return {"id":self.id,"name":self.name}
+        return {"id":self.id,"name":self.name,"manager_id":self.manager_id}  # updated
 
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -41,7 +44,8 @@ class Product(db.Model):
     sold = db.Column(db.Integer, nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
     manager_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    carts = db.relationship('Cart', backref='products',cascade = "all, delete-orphan",lazy=True) #when parent is deleted, child is deleted
+    carts = db.relationship('Cart', backref='products',cascade = "all, delete-orphan",lazy=True)
+    orders = db.relationship('Orders', backref='products',cascade = "all, delete-orphan",lazy=True)
 
     def convert_to_json(self):
         return {"id":self.id,
@@ -67,6 +71,7 @@ class Cart(db.Model):
                 "product_price":self.products.price,
                 "product_unit":self.products.unit,
                 "product_description":self.products.description}
+
 class Orders(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     customer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
@@ -74,6 +79,17 @@ class Orders(db.Model):
     quantity = db.Column(db.Integer, nullable=False)
     date_of_purchase = db.Column(db.DateTime, nullable=False, default=datetime.now())
 
+    def convert_to_json(self):
+        return {
+            "id": self.id,
+            "quantity": self.quantity,
+            "product_id": self.product_id,
+            "product_name": self.products.name,
+            "product_price": self.products.price,
+            "product_unit": self.products.unit,
+            "product_description": self.products.description,
+            "date_of_purchase": self.date_of_purchase.strftime("%Y-%m-%d %H:%M:%S")
+        }
 
 class CategoryRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -81,3 +97,10 @@ class CategoryRequest(db.Model):
     category_id = db.Column(db.Integer, nullable=True)
     action = db.Column(db.String(80),nullable=False)
     manager_id = db.Column(db.Integer,ForeignKey('users.id'), nullable=False)
+
+    def convert_to_json(self):
+        return {"id":self.id,
+                "name":self.name,
+                "category_id":self.category_id,
+                "action":self.action,
+                "manager_id":self.manager_id}

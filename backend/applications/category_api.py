@@ -2,12 +2,13 @@ from flask import request,current_app as app
 from flask_restful import Resource
 from flask_jwt_extended import create_access_token,jwt_required,get_jwt_identity,get_jwt
 from .models import Users,db,Orders,Cart,Product,Category,CategoryRequest
-
+from .api import cache
 
 
 class CategoryAPI(Resource):
 
     @jwt_required()
+    @cache.cached(timeout=120)
     def get(self):
         categories = Category.query.all()
         category_json = []

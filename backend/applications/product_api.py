@@ -2,20 +2,31 @@ from flask import request,current_app as app
 from flask_restful import Resource
 from flask_jwt_extended import create_access_token,jwt_required,get_jwt_identity,get_jwt
 from .models import db,Product,Category
+from .api import cache
 
 
 
 class ProductAPI(Resource):
 
     @jwt_required()
+    @cache.cached(timeout=120)
     def get(self):
-        products = Product.query.all()
-        product_json = []
-        for category in products:
-            product_json.append(category.convert_to_json())
-        return product_json,200
 
-        
+        current_user = get_jwt_identity()
+
+        claims = get_jwt()
+
+        if claims.get("role")  == "manager":
+            products = Product.query.filter_by(manager_id=current_user.get("user_id")).all()
+        else:
+            products = Product.query.all()
+
+        products_json = []
+
+        for product in products:
+            products_json.append(product.convert_to_json())
+
+        return {"products": products_json}, 200
 
     @jwt_required()
     def post(self):

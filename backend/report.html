@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        .container{
+            text-shadow: 10px,10px,10px #000000;
+            background:linear-gradient(to right,#000000,#ffffff1d);
+            color:white;
+            padding-bottom: 20px;
+            padding-left: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Order Report</h1>
+        </header>
+        <main>
+            {% for order in data %}
+            <p>{{order[0]}}</p>
+            <p>{{order[1]}}</p>
+            <p>{{order[2]}}</p>
+            <p>{{order[3]}}</p>
+            <p>{{order[4]}}</p>
+            <p>{{order[5]}}</p>
+            <p>Best regards,<br>Team Grocery Store</p>
+        </main>
+
+        <footer>
+            <p>&copy; 2023 Grocery Store. All rights reserved.</p>
+        </footer>
+    </div>
+</body>

@@ -2,11 +2,12 @@ from flask import request, current_app as app
 from flask_restful import Resource
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
 from .models import Users, db, Orders, Cart, Product, Category, CategoryRequest
-
+from .api import cache
 
 class CartAPI(Resource):
 
     @jwt_required()
+    @cache.cached(timeout=120)
     def get(self):
         current_user = get_jwt_identity()
         claims = get_jwt()
@@ -18,7 +19,11 @@ class CartAPI(Resource):
         cart_json = []
         for item in cart:
             cart_json.append(item.convert_to_json())
-        return cart_json, 200
+        cart_total = []
+        for item in cart_json:
+            cart_total.append(item.get("product_price") * item.get("quantity"))
+
+        return {"cart": cart_json, "total": sum(cart_total)}, 200
 
     @jwt_required()
     def post(self):
@@ -36,23 +41,26 @@ class CartAPI(Resource):
         if not (data.get("product_id") and data.get("quantity")):
             return {"message": "Missing required fields"}, 400
 
-        if data.get("quantity") < 1:
-            return {"message": "Quantity must be greater than 0"}, 400
+        cart_product = Cart.query.filter_by(customer_id = current_user.get("user_id"),product_id=data.get("product_id")).first()
+        if not cart_product:
+            product = Product.query.get(data.get("product_id"))
+            if not product:
+                return {"message": "Product not found"}, 404
 
-        product = Product.query.get(data.get("product_id"))
-        if not product:
-            return {"message": "Product not found"}, 404
+            new_cart = Cart(
+                product_id=data.get("product_id"),
+                quantity=data.get("quantity", 1),
+                customer_id=current_user
+            )
 
-        new_cart = Cart(
-            product_id=data.get("product_id"),
-            quantity=data.get("quantity"),
-            customer_id=current_user
-        )
+            db.session.add(new_cart)
+            db.session.commit()
 
-        db.session.add(new_cart)
+            return {"message": "Product added to cart successfully"}, 200
+        cart_product.quantity += data.get("quantity", 1)
         db.session.commit()
 
-        return {"message": "Product added to cart successfully"}, 200
+        return {"message": "Product quantity updated successfully"}, 200
 
     @jwt_required()
     def patch(self, cart_id):
