@@ -3,22 +3,28 @@
         <div class="row justify-content-center">
             <div class="col-md-6">
                 <div class="card">
-                    <div class="card-header">User Login</div>
+                    <div class="card-header">Manager Signup</div>
                     <div class="card-body">
-                        <form @submit.prevent="loginUser">
-                            <div class = "form-group">
+                        <form @submit.prevent="signupManager">
+                            <div class="form-group">
+                                <label for="name">Name</label>
+                                <input type="text" class="form-control" id="name" v-model="name" required>
+                            </div>
+                            <div class="form-group">
                                 <label for="email">Email</label>
                                 <input type="email" class="form-control" id="email" v-model="email" required>
                             </div>
-                            <div class = "form-group">
+                            <div class="form-group">
                                 <label for="password">Password</label>
                                 <input type="password" class="form-control" id="password" v-model="password" required>
                             </div>
-                            <div v-if = "error" class = "alert alert-danger" role = "alert">
+                            <div v-if="error" class="alert alert-danger" role="alert">
                                 {{ error }}
                             </div>
-                            <button type="submit" class="btn btn-primary">Login</button>
-                            <router-link to="/user-signup" class="btn btn-success">Signup</router-link>
+                            <div v-if="success" class="alert alert-success" role="alert">
+                                {{ success }}
+                            </div>
+                            <button type="submit" class="btn btn-primary">Signup</button>
                         </form>
                     </div>
                 </div>
@@ -31,20 +37,25 @@
 export default {
     data() {
         return {
+            name: '',
             email: '',
             password: '',
-            error: null
+            error: null,
+            success: null
         }
     },
     methods: {
-        async loginUser() {
+        async signupManager() {
             this.error = null;
+            this.success = null;
             const payload = {
+                name: this.name,       // added
                 email: this.email,
-                password: this.password
+                password: this.password,
+                role: "manager"
             };
             try {
-                const response = await fetch('/api/login', {
+                const response = await fetch('/api/signup', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -55,13 +66,7 @@ export default {
                 if (!response.ok) {
                     this.error = result.message || "Something went wrong";
                 } else {
-                    if (result.user_role == "customer") {
-                        alert("Login successful");
-                        localStorage.setItem('token', result.token);
-                        this.$router.push('/user');
-                    } else {
-                        this.error = "You are not a user";
-                    }
+                    this.success = "Signup successful! Please wait for admin approval.";
                 }
             } catch(error) {
                 this.error = "Unable to connect to the server";
@@ -70,5 +75,3 @@ export default {
     }
 }
 </script>
-                        
-

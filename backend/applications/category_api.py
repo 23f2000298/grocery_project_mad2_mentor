@@ -1,8 +1,9 @@
-from flask import request,current_app as app
+from flask import request, current_app as app
 from flask_restful import Resource
-from flask_jwt_extended import create_access_token,jwt_required,get_jwt_identity,get_jwt
-from .models import Users,db,Orders,Cart,Product,Category,CategoryRequest
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
+from .models import Users, db, Orders, Cart, Product, Category, CategoryRequest
 from .api import cache
+import json
 
 
 class CategoryAPI(Resource):
@@ -11,21 +12,14 @@ class CategoryAPI(Resource):
     @cache.cached(timeout=120)
     def get(self):
         categories = Category.query.all()
-        category_json = []
-        for category in categories:
-            category_json.append(category.convert_to_json())
-        return category_json,200
-
-        
+        category_json = [category.convert_to_json() for category in categories]
+        return category_json, 200
 
     @jwt_required()
     def post(self):
+        current_user = json.loads(get_jwt_identity())  # role is here
 
-        current_user = get_jwt_identity()
-
-        claims = get_jwt()
-
-        if claims.get("role") != "admin":
+        if current_user.get("role") != "admin":        # check identity, not claims
             return {"message": "access denied"}, 403
 
         data = request.get_json()
@@ -37,20 +31,16 @@ class CategoryAPI(Resource):
             return {"message": "Name must be between 2 and 100 characters"}, 400
 
         new_category = Category(name=data.get("name").strip())
-
         db.session.add(new_category)
         db.session.commit()
 
         return {"message": "Category added successfully"}, 200
 
     @jwt_required()
-    def put(self,category_id):
+    def put(self, category_id):
+        current_user = json.loads(get_jwt_identity())
 
-        current_user = get_jwt_identity()
-
-        claims = get_jwt()
-
-        if claims.get("role") != "admin":
+        if current_user.get("role") != "admin":
             return {"message": "access denied"}, 403
 
         data = request.get_json()
@@ -67,20 +57,15 @@ class CategoryAPI(Resource):
             return {"message": "Category not found"}, 404
 
         category.name = data.get("name").strip()
-
-        db.session.add(category)
         db.session.commit()
 
         return {"message": "Category updated successfully"}, 200
-    
+
     @jwt_required()
-    def delete(self,category_id):
+    def delete(self, category_id):
+        current_user = json.loads(get_jwt_identity())
 
-        current_user = get_jwt_identity()
-
-        claims = get_jwt()
-
-        if claims.get("role") != "admin":
+        if current_user.get("role") != "admin":
             return {"message": "access denied"}, 403
 
         category = Category.query.get(category_id)

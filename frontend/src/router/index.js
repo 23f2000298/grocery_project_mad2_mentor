@@ -3,6 +3,10 @@ import HomeView from "@/components/HomeView.vue";
 import AdminLogin from '@/components/AdminLogin.vue';
 import UserLogin from '@/components/UserLogin.vue';
 import ManagerLogin from '@/components/ManagerLogin.vue';
+import ManagerSignup from '@/components/ManagerSignup.vue';
+import UserSignup from '@/components/UserSignup.vue';
+import AdminDashboard from '@/components/AdminDashboard.vue';  // removed duplicate UserLogin import
+import CreateCategory from '../components/CreateCategory.vue';
 
 const router = createRouter({
     history:createWebHistory(import.meta.env.BASE_URL),
@@ -26,6 +30,26 @@ const router = createRouter({
         name:'manager-login',
         component:ManagerLogin,
     },
+    {
+        path:'/manager-signup',
+        name:'manager-signup',
+        component:ManagerSignup,
+    },
+    {
+        path:'/user-signup',
+        name:'user-signup',
+        component:UserSignup,
+    },
+    {
+        path:'/admin',
+        name:'admin-dashboard',
+        component:AdminDashboard,
+    },
+    {
+        path:'/create-category',
+        name:'create-category',
+        component:CreateCategory,
+    }
     ]
 })
 

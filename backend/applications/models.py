@@ -27,13 +27,12 @@ class Users(db.Model):
 
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80),nullable=False)
-    manager_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)  # added
-    products = db.relationship('Product', backref='category',cascade = "all, delete-orphan",lazy=True)
+    name = db.Column(db.String(80), nullable=False)
+    manager_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)  # changed to nullable=True
+    products = db.relationship('Product', backref='category', cascade="all, delete-orphan", lazy=True)
 
     def convert_to_json(self):
-        return {"id":self.id,"name":self.name,"manager_id":self.manager_id}  # updated
-
+        return {"id": self.id, "name": self.name, "manager_id": self.manager_id}
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80),nullable=False)

@@ -18,7 +18,10 @@
                                 {{ error }}
                             </div>
                             <button type="submit" class="btn btn-primary">Login</button>
+                            <router-link to="/manager-signup" class="btn btn-success">Signup</router-link>
+                            
                         </form>
+                
                     </div>
                 </div>
             </div>
@@ -27,6 +30,8 @@
 </template>
 
 <script>
+import router from '../router';
+
 export default {
     name: 'ManagerLogin',
     data() {              // ✅ lowercase 'data' not 'Data'

@@ -2,7 +2,7 @@ from flask import request,current_app as app
 from flask_restful import Resource
 from flask_jwt_extended import create_access_token,jwt_required,get_jwt_identity,get_jwt
 from .models import Users,db,Orders,Cart,Product,Category,CategoryRequest
-
+import json
 
 
     
@@ -11,11 +11,11 @@ class AuthAPI(Resource):
 
     @jwt_required() 
     def get(self):
-        current_user = get_jwt_identity()
+        current_user =json.loads(get_jwt_identity())
 
         claims = get_jwt()
 
-        if claims.get("role") != "admin":
+        if current_user.get("role") != "admin":
             return {"message": "access denied"},403
         manager = Users.query.filter_by(role = "manager").all()
         manager_json = []
@@ -34,13 +34,10 @@ class AuthAPI(Resource):
             return {"message": "Invalid password"},401
         
         if user.role == "manager" and user.status == "pending":
-            return {"message": "Your account is pending"},401
-        
+            return {"message": "Your account is pending"},401        
+        identity = {"role":user.role,"id":user.id}
         token = create_access_token(
-            identity=str(user.id),
-            additional_claims={
-                "role": user.role
-            }
+            identity=json.dumps(identity)
         ) 
         return {"message": "Login successful",
                 "token":token,
@@ -50,11 +47,11 @@ class AuthAPI(Resource):
 
     @jwt_required() 
     def patch(self,manager_id):
-        current_user = get_jwt_identity()
+        current_user =json.loads(get_jwt_identity())
 
         claims = get_jwt()
 
-        if claims.get("role") != "admin":
+        if current_user.get("role") != "admin":
             return {"message": "access denied"},403
         manager = Users.query.filter_by(id=manager_id).first()
         if not manager:
