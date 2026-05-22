@@ -12,9 +12,6 @@
                     <router-link to="/create-category" class="nav-link">Create Category</router-link>
                 </li>
                 <li>
-                    <router-link to="/create-product" class="nav-link">Create Product</router-link>
-                </li>
-                <li>
                     <router-link to="/export" class="nav-link">Export</router-link>
                 </li>
                 <li>
@@ -101,12 +98,25 @@
 </template>
 
 <script>
+import { provide } from 'vue';
+
 export default {
     data() {
         return {
             managers: [],
-            categories: [],
             errorMessage: null,
+            Products: [],
+            categories: [],
+            newProduct:{
+                name: '',
+                price: '',
+                description: '',
+                category_id: '',
+                unit: '',
+                stock: '',
+                sold: '',
+                manager_id: '',
+            }
         };
     },
     methods: {
@@ -116,16 +126,26 @@ export default {
         },
         async fetchManagers() {
             try {
+                const token = localStorage.getItem('token');
+                console.log("Token:", token);           // ✅ check token exists
+
                 const response = await fetch('/api/manager', {
                     method: 'GET',
                     headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
                     },
                 });
+
+                console.log("Status:", response.status); // ✅ check response status
                 const result = await response.json();
+                console.log("Result:", result);           // ✅ check what Flask returns
+
                 if (!response.ok) {
                     this.errorMessage = result.message || "Error fetching managers";
+                    if (response.status === 403) {
+                        this.$router.push('/admin-login'); // ✅ kick out if wrong role
+                    }
                 } else {
                     this.managers = result;
                 }

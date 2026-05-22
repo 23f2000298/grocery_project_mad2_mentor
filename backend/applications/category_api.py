@@ -9,7 +9,7 @@ import json
 class CategoryAPI(Resource):
 
     @jwt_required()
-    @cache.cached(timeout=120)
+    # @cache.cached(timeout=120)
     def get(self):
         categories = Category.query.all()
         category_json = [category.convert_to_json() for category in categories]

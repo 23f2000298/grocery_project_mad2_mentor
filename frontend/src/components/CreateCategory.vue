@@ -10,10 +10,6 @@
                                 <label for="name">Name</label>
                                 <input type="text" class="form-control" id="name" v-model="name" required>
                             </div>
-                            <div class="form-group">
-                                <label for="description">Description</label>
-                                <input type="text" class="form-control" id="description" v-model="description" required>
-                            </div>
                             <div v-if="error" class="alert alert-danger" role="alert">
                                 {{ error }}
                             </div>

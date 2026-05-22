@@ -14,7 +14,7 @@ from .api import cache
 class PurchaseAPI(Resource):
 
     @jwt_required()
-    @cache.cached(timeout=120)
+    # @cache.cached(timeout=120)
     def get(self):
 
         

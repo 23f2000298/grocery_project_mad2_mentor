@@ -9,7 +9,7 @@ import json
 class CategoryRequestAPI(Resource):
 
     @jwt_required()
-    @cache.cached(timeout=120)
+    # @cache.cached(timeout=120)
     def get(self):
         current_user = json.loads(get_jwt_identity())
         role = current_user.get("role")

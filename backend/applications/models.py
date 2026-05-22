@@ -47,14 +47,15 @@ class Product(db.Model):
     orders = db.relationship('Orders', backref='products',cascade = "all, delete-orphan",lazy=True)
 
     def convert_to_json(self):
-        return {"id":self.id,
-                "name":self.name,
-                "description":self.description,
-                "price":self.price,
-                "unit":self.unit,
-                "stock":self.stock,
-                "sold":self.sold,
-                "category_id":self.category_id}
+        return {"id": self.id,
+                "name": self.name,
+                "description": self.description,
+                "price": self.price,
+                "unit": self.unit,
+                "stock": self.stock,
+                "sold": self.sold,
+                "category_id": self.category_id,
+                "category_name": self.category.name}
 
 class Cart(db.Model):
     id = db.Column(db.Integer, primary_key=True)

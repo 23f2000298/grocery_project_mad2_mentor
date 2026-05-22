@@ -7,7 +7,7 @@ from .api import cache
 class CartAPI(Resource):
 
     @jwt_required()
-    @cache.cached(timeout=120)
+    # @cache.cached(timeout=120)
     def get(self):
         current_user = get_jwt_identity()
         claims = get_jwt()

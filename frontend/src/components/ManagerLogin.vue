@@ -60,11 +60,12 @@ export default {
                 if (!response.ok) {
                     this.error = result.message || "Something went wrong";
                 } else {
-                    if (result.user_role == "manager") {
-                        alert("Login successful");
-                        localStorage.setItem('token', result.token);
-                        this.$router.push('/manager');
-                    } else {
+                    // line 50 - after
+                if (result.user_role === "manager") {
+                    localStorage.setItem('token', result.token);
+                    alert("Login successful");
+                    this.$router.push('/manager'); // ✅ token saved before redirect
+                }else {
                         this.error = "You are not a manager";
                     }
                 }
