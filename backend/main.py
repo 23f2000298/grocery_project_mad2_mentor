@@ -74,7 +74,6 @@ api.add_resource(CategoryRequestAPI,"/api/category/request")
 api.add_resource(CategoryApprovial,"/api/category/request/action")
 api.add_resource(ExportDataAPI,"/api/product/export")
     
-    
 
 
 if __name__ == "__main__":    

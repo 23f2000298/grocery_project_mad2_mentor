@@ -55,7 +55,7 @@ class Product(db.Model):
                 "stock": self.stock,
                 "sold": self.sold,
                 "category_id": self.category_id,
-                "category_name": self.category.name}
+                "category_name": self.category.name if self.category else "Uncategorized"}
 
 class Cart(db.Model):
     id = db.Column(db.Integer, primary_key=True)

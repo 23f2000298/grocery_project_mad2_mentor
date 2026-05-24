@@ -10,13 +10,19 @@ import json  # ✅ added
 class ProductAPI(Resource):
 
     @jwt_required()
-    def get(self):
+    def get(self, product_id=None):
         current_user = json.loads(get_jwt_identity())  # ✅ fixed
         manager_id = current_user.get("id")
         role = current_user.get("role")
 
+        if product_id:
+            product = Product.query.filter_by(id=product_id, manager_id=manager_id).first()
+            if not product:
+                return {"message": "Product not found"}, 404
+            return product.convert_to_json(), 200
+
         if role == "manager":
-            products = Product.query.filter_by(manager_id=manager_id).all()  # ✅ fixed
+                products = Product.query.filter_by(manager_id=manager_id).all()
         else:
             products = Product.query.all()
 
@@ -96,6 +102,20 @@ class ProductAPI(Resource):
         db.session.delete(product)
         db.session.commit()
         return {"message": "Product deleted successfully"}, 200
+
+
+
+class OneProductAPI(Resource):
+    @jwt_required()
+    def get(self,product_id):
+        current_user = json.loads(get_jwt_identity)
+        if current_user.get("role") == "manager":
+            product = Product.query.filter_by(id = product_id,manager_id = current_user.get("user_id")).first()
+        else:
+            product = Product.query.filter_by(id = product_id).first()
+        if not product:
+            return {"message":"Product not found"},404
+        return product.convert_to_json(),200
 
 
 class ExportDataAPI(Resource):
