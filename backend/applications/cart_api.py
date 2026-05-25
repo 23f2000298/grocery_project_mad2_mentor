@@ -3,13 +3,14 @@ from flask_restful import Resource
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
 from .models import Users, db, Orders, Cart, Product, Category, CategoryRequest
 from .api import cache
+import json
 
 class CartAPI(Resource):
 
     @jwt_required()
     # @cache.cached(timeout=120)
     def get(self):
-        current_user = get_jwt_identity()
+        current_user = json.loads(get_jwt_identity())
         claims = get_jwt()
 
         if claims.get("role") != "customer":
@@ -27,7 +28,7 @@ class CartAPI(Resource):
 
     @jwt_required()
     def post(self):
-        current_user = get_jwt_identity()
+        current_user = json.loads(get_jwt_identity())
         claims = get_jwt()
 
         if claims.get("role") != "customer":
@@ -64,7 +65,7 @@ class CartAPI(Resource):
 
     @jwt_required()
     def patch(self, cart_id):
-        current_user = get_jwt_identity()
+        current_user = json.loads(get_jwt_identity())
         claims = get_jwt()
 
         if claims.get("role") != "customer":
@@ -93,7 +94,7 @@ class CartAPI(Resource):
 
     @jwt_required()
     def delete(self, cart_id):
-        current_user = get_jwt_identity()
+        current_user = json.loads(get_jwt_identity())
         claims = get_jwt()
 
         if claims.get("role") != "customer":

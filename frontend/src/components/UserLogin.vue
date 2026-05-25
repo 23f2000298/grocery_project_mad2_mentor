@@ -58,7 +58,7 @@ export default {
                     if (result.user_role == "customer") {
                         alert("Login successful");
                         localStorage.setItem('token', result.token);
-                        this.$router.push('/user');
+                        this.$router.push('/customer');
                     } else {
                         this.error = "You are not a user";
                     }
