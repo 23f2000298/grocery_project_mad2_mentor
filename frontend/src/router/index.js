@@ -10,7 +10,9 @@ import CreateCategory from '@/components/CreateCategory.vue';
 import EditCategory from '@/components/EditCategory.vue';
 import ManagerDashboard from '@/components/ManagerDashboard.vue';
 import EditProduct from '@/components/EditProduct.vue';
-import CustomerDashboard from '../components/CustomerDashboard.vue';
+import CustomerDashboard from '@/components/CustomerDashboard.vue';
+import CustomerCart from '@/components/CustomerCart.vue';
+import CustomerOrders from '@/components/CustomerOrders.vue';
 
 // ✅ Helper to decode JWT and get role
 function getRoleFromToken() {
@@ -93,6 +95,18 @@ const router = createRouter({
             path: '/customer',
             name: 'customer-dashboard',
             component: CustomerDashboard,
+            meta: { requiresAuth: true, role: 'customer' }, // ✅ guard
+        },
+        {
+            path: '/customer/cart',
+            name: 'customer-cart',
+            component: CustomerCart,
+            meta: { requiresAuth: true, role: 'customer' }, // ✅ guard
+        },
+        {
+            path: '/customer/orders',
+            name: 'customer-orders',
+            component: CustomerOrders,
             meta: { requiresAuth: true, role: 'customer' }, // ✅ guard
         },
     ]

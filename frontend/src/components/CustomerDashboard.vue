@@ -11,7 +11,10 @@
                         <router-link to = "/customer" class="nav-link active" aria-current="page">Home</router-link>
                     </li>
                     <li class="nav-item">
-                        <router-link to = "/cart" class="nav-link">Cart</router-link>
+                        <router-link to="/customer/cart" class="nav-link">Cart</router-link>
+                    </li>
+                    <li class="nav-item">
+                        <router-link to="/customer/orders" class="nav-link">Orders</router-link>
                     </li>
                     
                 </ul>
@@ -51,8 +54,7 @@
                                         <input type="number" class="form-control" placeholder="Quantity" v-model="product.quantity">
                                     </td>
                                     <td>
-                                        <button class="btn btn-primary btn-sm" @click="addToCart(product.id)">Add to Cart</button>
-                                    </td>
+                                    <button class="btn btn-primary btn-sm" @click="addToCart(product.id, product.quantity)">Add to Cart</button>                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -121,27 +123,29 @@
                 }
             },
             async addToCart(product_id, quantity) {
-                try {
-                    const response = await fetch('/api/cart', {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ product_id, quantity })
-                    });
-                    const result = await response.json();
-                    if (!response.ok) {
-                        this.errorMessage = result.message || "Error adding to cart";
-                    } else {
-                        alert("Product added to cart");
-                        
-            
+                    if (!quantity || quantity < 1) {
+                        alert("Please enter a valid quantity");
+                        return;
                     }
-                } catch (error) {
-                    this.errorMessage = "Unable to connect to the server";
+                    try {
+                        const response = await fetch('/api/cart', {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ product_id, quantity: parseInt(quantity) }) // ✅ send as int
+                        });
+                        const result = await response.json();
+                        if (!response.ok) {
+                            alert(result.message || "Error adding to cart");
+                        } else {
+                            alert("Product added to cart successfully");
+                        }
+                    } catch (error) {
+                        alert("Unable to connect to the server");
+                    }
                 }
-            }
         },
         mounted() {
             this.fetchProducts();

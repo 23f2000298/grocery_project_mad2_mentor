@@ -6,6 +6,7 @@ from flask_jwt_extended import (
     get_jwt_identity,
     get_jwt
 )
+import json
 
 from .models import Users, db, Orders, Cart, Product, Category, CategoryRequest
 from .api import cache
@@ -14,55 +15,36 @@ from .api import cache
 class PurchaseAPI(Resource):
 
     @jwt_required()
-    # @cache.cached(timeout=120)
     def get(self):
+        current_user = json.loads(get_jwt_identity())
 
-        
-        current_user = get_jwt_identity()
-        claims = get_jwt()
-
-        if claims.get("role") != "customer":
+        if current_user.get("role") != "customer":
             return {"message": "access denied"}, 403
 
-        orders = Orders.query.filter_by(
-            customer_id=current_user
-        ).all()
-
-        orders_json = []
-
-        for order in orders:
-            orders_json.append(order.convert_to_json())
-
-        return {"orders": orders_json}, 200
+        orders = Orders.query.filter_by(customer_id=current_user["id"]).all()
+        return {"orders": [order.convert_to_json() for order in orders]}, 200
 
     @jwt_required()
     def post(self):
+        current_user = json.loads(get_jwt_identity())
 
-        current_user = get_jwt_identity()
-        claims = get_jwt()
-
-        if claims.get("role") != "customer":
+        if current_user.get("role") != "customer":
             return {"message": "access denied"}, 403
 
-        cart_product = Cart.query.filter_by(
-            customer_id=current_user
-        ).all()
+        cart_products = Cart.query.filter_by(customer_id=current_user["id"]).all()
 
-        if len(cart_product) == 0:
+        if not cart_products:
             return {"message": "Cart is empty"}, 400
 
-        for product in cart_product:
-
+        for product in cart_products:
             new_order = Orders(
                 product_id=product.product_id,
                 quantity=product.quantity,
-                customer_id=current_user
+                customer_id=current_user["id"]  # ✅
             )
-
             db.session.add(new_order)
-            db.session.delete(product)
             product.products.sold += product.quantity
+            db.session.delete(product)
 
         db.session.commit()
-
         return {"message": "Thank you for your purchase"}, 200
