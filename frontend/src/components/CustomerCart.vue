@@ -25,8 +25,7 @@
                 <div class="card">
                     <div class="card-header">Your Cart</div>
                     <div class="card-body">
-                        <p v-if="cart.length === 0" class="text-center">Your cart is empty.</p>
-                        <table v-else class="table">
+                        <table v-if="cart.length > 0" class="table">
                             <thead>
                                 <tr>
                                     <th>Name</th>
@@ -51,7 +50,8 @@
                                 </tr>
                             </tbody>
                         </table>
-                        <div class="text-center mt-3">
+                        <div v-else class="text-center mt-3">Your cart is empty</div>
+                        <div v-if="cart.length > 0" class="text-center mt-3">
                             <h4>Total: ₹{{ total }}</h4>
                             <button class="btn btn-primary" @click="Ordernow">Order Now</button>
                         </div>

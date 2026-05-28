@@ -30,6 +30,7 @@
                     <div class="card-header">All Products</div>
                     <div class="card-body">
                         <table class="table">
+                            <table v-if = "allProducts.length > 0" class="table">
                             <thead>
                                 <tr>
                                     <th>ID</th>
@@ -57,6 +58,10 @@
                                     <button class="btn btn-primary btn-sm" @click="addToCart(product.id, product.quantity)">Add to Cart</button>                                    </td>
                                 </tr>
                             </tbody>
+                            </table>
+                            <div v-else>
+                                <p>No products found</p>
+                            </div>
                         </table>
                     </div>
                 </div>

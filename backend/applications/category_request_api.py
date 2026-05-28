@@ -83,12 +83,15 @@ class CategoryApprovial(Resource):
             return {"message": "Invalid action"}, 400
 
         if data.get("action").strip() == "REJECT":
-            CategoryRequest.query.filter_by(id=data.get("request_id")).delete()
+            category_request = CategoryRequest.query.filter_by(id=data.get("request_id")).first()
+            category_request.status == "rejected"
             db.session.commit()
             return {"message": "Category request rejected successfully"}, 200
 
         if data.get("action").strip() == "APPROVE":
             category_request = CategoryRequest.query.filter_by(id=data.get("request_id")).first()
+            category_request.status == "approved"
+            db.session.commit()
             if not category_request:
                 return {"message": "Category request not found"}, 404
             if category_request.action == "CREATE":

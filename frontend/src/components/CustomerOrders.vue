@@ -26,7 +26,7 @@
                 <div class="card">
                     <div class="card-header">Orders</div>
                     <div class="card-body">
-                        <table class="table">
+                        <table v-if = "orders.length > 0" class="table">
                             <thead>
                                 <tr>
                                     <th scope="col">Order No.</th>
@@ -50,6 +50,9 @@
                                 </tr>
                             </tbody>
                         </table>
+                        <div v-else>
+                            <p>No orders found</p>
+                        </div>
                     </div>
                 </div>
             </div>

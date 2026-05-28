@@ -68,7 +68,7 @@
                 <div class="card">
                     <div class="card-header">All Categories</div>
                     <div class="card-body">
-                        <table class="table">
+                        <table v-if = "categories.length > 0" class="table">
                             <thead>
                                 <tr>
                                     <th scope="col">ID</th>
@@ -90,11 +90,50 @@
                                 </tr>
                             </tbody>
                         </table>
+                        <p v-else> No categories found.</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-10">
+        <div class="card">
+          <div class="card-header">Category Request</div>
+          <div class="card-body">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">Category ID</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Action</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- FIX 6: iterate over categoryRequest, not categories -->
+                <tr v-for="(request, index) in categoryRequest" :key="index">
+                  <td>{{ request.category_id }}</td>
+                  <td>{{ request.name }}</td>
+                  <td>{{ request.action }}</td>
+                  <td>{{ request.status }}</td>
+                  <td>
+                    <button v-if="request.status == 'pending'" @click="approveCategoryRequest(request.id)" class="btn btn-success btn-sm">Approve</button>
+                    <button v-if="request.status == 'pending'" @click="rejectCategoryRequest(request.id)" class="btn btn-danger btn-sm">Reject</button>
+
+                    <span v-else class="text-muted">—</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -107,6 +146,7 @@ export default {
             errorMessage: null,
             Products: [],
             categories: [],
+            categoryRequest: [],
             newProduct:{
                 name: '',
                 price: '',
@@ -124,6 +164,52 @@ export default {
             localStorage.removeItem('token');
             this.$router.push('/');
         },
+
+
+        async approveCategoryRequest(id) {
+            try {
+                const response = await fetch(`/api/category/request/action`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        request_id = id,
+                        action: 'approve',
+                    }),
+                });
+                const result = await response.json();
+                if (!response.ok) {
+                    this.errorMessage = result.message || "Error approving category request";
+                } else {
+                    alert("Category request approved successfully");
+                    this.fetchCategoryRequest();
+                }
+            } catch (error) {
+                this.errorMessage = "Unable to connect to the server";
+            }
+        },
+        async fetchCategoryRequest() {
+        try {
+            const response = await fetch('/api/category/request', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            const result = await response.json();
+            if (!response.ok) {
+                this.errorMessage = result.message || "Error fetching category requests";
+            } else {
+                // FIX: extract the array from the correct key
+                this.categoryRequest = result.category_request;
+            }
+        } catch (error) {
+            this.errorMessage = "Unable to connect to the server";
+        }
+    },
         async fetchManagers() {
             try {
                 const token = localStorage.getItem('token');
@@ -216,6 +302,7 @@ export default {
     mounted() {
         this.fetchManagers();
         this.fetchCategories();
+        this.fetchCategoryRequest();
     },
 }
 </script>

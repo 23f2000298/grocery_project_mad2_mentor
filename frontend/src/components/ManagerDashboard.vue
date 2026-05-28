@@ -146,17 +146,19 @@
             <table class="table">
               <thead>
                 <tr>
-                  <th scope="col">Action</th>
                   <th scope="col">Category ID</th>
                   <th scope="col">Name</th>
+                  <th scope="col">Action</th>
+                  <th scope="col">Status</th>
                 </tr>
               </thead>
               <tbody>
                 <!-- FIX 6: iterate over categoryRequest, not categories -->
                 <tr v-for="(request, index) in categoryRequest" :key="index">
-                  <td>{{ request.action }}</td>
                   <td>{{ request.category_id }}</td>
                   <td>{{ request.name }}</td>
+                  <td>{{ request.action }}</td>
+                  <td>{{ request.status }}</td>
                 </tr>
               </tbody>
             </table>
