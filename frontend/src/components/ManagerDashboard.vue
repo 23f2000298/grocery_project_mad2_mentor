@@ -8,6 +8,9 @@
             <a class="nav-link active" href="#">Home</a>
           </li>
           <li class="nav-item">
+            <a class="nav-link" href="#" @click="exportdata">Export CSV</a>
+          </li>
+          <li class="nav-item">
             <a class="nav-link" href="#" @click="logout">Logout</a>
           </li>
         </ul>
@@ -59,7 +62,7 @@
         <div class="card">
           <div class="card-header">All Products</div>
           <div class="card-body">
-            <table class="table">
+            <table v-if = "allProducts !=0" class="table">
               <thead>
                 <tr>
                   <th>ID</th>
@@ -89,6 +92,7 @@
                 </tr>
               </tbody>
             </table>
+            <p v-else>No Products Found</p>
           </div>
         </div>
 
@@ -143,7 +147,7 @@
         <div class="card">
           <div class="card-header">Category Request</div>
           <div class="card-body">
-            <table class="table">
+            <table v-if = "categoryRequest !=0" class="table">
               <thead>
                 <tr>
                   <th scope="col">Category ID</th>
@@ -162,6 +166,7 @@
                 </tr>
               </tbody>
             </table>
+            <p if-else>No Request Found</p>
           </div>
         </div>
       </div>
@@ -196,6 +201,26 @@ export default {
     async logout() {
       localStorage.removeItem('token');
       this.$router.push('/');
+    },
+    async exportdata() {
+      try {
+        const response = await fetch('/api/product/export', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        if (response.ok) {
+          const result = await response.json();
+          alert(result.message);
+        } else {
+          const result = await response.json();
+          alert(result.message);
+        }
+      } catch (error) {
+        alert("Unable to connect to the server");
+      }
     },
     async SendCreateUpdateDeleteRequest(action) {
     try {

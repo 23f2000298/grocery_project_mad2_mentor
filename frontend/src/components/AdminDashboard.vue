@@ -68,7 +68,7 @@
                 <div class="card">
                     <div class="card-header">All Categories</div>
                     <div class="card-body">
-                        <table v-if = "categories.length > 0" class="table">
+                        <table v-if="categories.length > 0" class="table">
                             <thead>
                                 <tr>
                                     <th scope="col">ID</th>
@@ -90,73 +90,60 @@
                                 </tr>
                             </tbody>
                         </table>
-                        <p v-else> No categories found.</p>
+                        <p v-else>No categories found.</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-md-10">
-        <div class="card">
-          <div class="card-header">Category Request</div>
-          <div class="card-body">
-            <table class="table">
-              <thead>
-                <tr>
-                  <th scope="col">Category ID</th>
-                  <th scope="col">Name</th>
-                  <th scope="col">Action</th>
-                  <th scope="col">Status</th>
-                  <th scope="col">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <!-- FIX 6: iterate over categoryRequest, not categories -->
-                <tr v-for="(request, index) in categoryRequest" :key="index">
-                  <td>{{ request.category_id }}</td>
-                  <td>{{ request.name }}</td>
-                  <td>{{ request.action }}</td>
-                  <td>{{ request.status }}</td>
-                  <td>
-                    <button v-if="request.status == 'pending'" @click="approveCategoryRequest(request.id)" class="btn btn-success btn-sm">Approve</button>
-                    <button v-if="request.status == 'pending'" @click="rejectCategoryRequest(request.id)" class="btn btn-danger btn-sm">Reject</button>
-
-                    <span v-else class="text-muted">—</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="card">
+                    <div class="card-header">Category Requests</div>
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Category ID</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Action</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(request, index) in categoryRequest" :key="index">
+                                    <td>{{ request.category_id }}</td>
+                                    <td>{{ request.name }}</td>
+                                    <td>{{ request.action }}</td>
+                                    <td>{{ request.status }}</td>
+                                    <td>
+                                        <template v-if="request.status == 'pending'">
+                                            <button @click="approveCategoryRequest(request.id)" class="btn btn-success btn-sm me-1">Approve</button>
+                                            <button @click="rejectCategoryRequest(request.id)" class="btn btn-danger btn-sm">Reject</button>
+                                        </template>
+                                        <span v-else class="text-muted">—</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 </template>
 
 <script>
-import { provide } from 'vue';
-
 export default {
     data() {
         return {
             managers: [],
             errorMessage: null,
-            Products: [],
             categories: [],
             categoryRequest: [],
-            newProduct:{
-                name: '',
-                price: '',
-                description: '',
-                category_id: '',
-                unit: '',
-                stock: '',
-                sold: '',
-                manager_id: '',
-            }
         };
     },
     methods: {
@@ -165,56 +152,10 @@ export default {
             this.$router.push('/');
         },
 
-
-        async approveCategoryRequest(id) {
-            try {
-                const response = await fetch(`/api/category/request/action`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        request_id = id,
-                        action: 'approve',
-                    }),
-                });
-                const result = await response.json();
-                if (!response.ok) {
-                    this.errorMessage = result.message || "Error approving category request";
-                } else {
-                    alert("Category request approved successfully");
-                    this.fetchCategoryRequest();
-                }
-            } catch (error) {
-                this.errorMessage = "Unable to connect to the server";
-            }
-        },
-        async fetchCategoryRequest() {
-        try {
-            const response = await fetch('/api/category/request', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                    'Content-Type': 'application/json',
-                },
-            });
-            const result = await response.json();
-            if (!response.ok) {
-                this.errorMessage = result.message || "Error fetching category requests";
-            } else {
-                // FIX: extract the array from the correct key
-                this.categoryRequest = result.category_request;
-            }
-        } catch (error) {
-            this.errorMessage = "Unable to connect to the server";
-        }
-    },
+        // ── Managers ──────────────────────────────────────────
         async fetchManagers() {
             try {
                 const token = localStorage.getItem('token');
-                console.log("Token:", token);           // ✅ check token exists
-
                 const response = await fetch('/api/manager', {
                     method: 'GET',
                     headers: {
@@ -222,15 +163,11 @@ export default {
                         'Content-Type': 'application/json',
                     },
                 });
-
-                console.log("Status:", response.status); // ✅ check response status
                 const result = await response.json();
-                console.log("Result:", result);           // ✅ check what Flask returns
-
                 if (!response.ok) {
                     this.errorMessage = result.message || "Error fetching managers";
                     if (response.status === 403) {
-                        this.$router.push('/admin-login'); // ✅ kick out if wrong role
+                        this.$router.push('/admin-login');
                     }
                 } else {
                     this.managers = result;
@@ -239,6 +176,7 @@ export default {
                 this.errorMessage = "Unable to connect to the server";
             }
         },
+
         async approveManager(id) {
             try {
                 const response = await fetch(`/api/manager/${id}`, {
@@ -259,6 +197,8 @@ export default {
                 this.errorMessage = "Unable to connect to the server";
             }
         },
+
+        // ── Categories ────────────────────────────────────────
         async fetchCategories() {
             try {
                 const response = await fetch('/api/category', {
@@ -272,12 +212,13 @@ export default {
                 if (!response.ok) {
                     this.errorMessage = result.message || "Error fetching categories";
                 } else {
-                    this.categories = result;
+                    this.categories = result.categories || result;
                 }
             } catch (error) {
                 this.errorMessage = "Unable to connect to the server";
             }
         },
+
         async deleteCategory(id) {
             try {
                 const response = await fetch(`/api/category/${id}`, {
@@ -298,7 +239,80 @@ export default {
                 alert("Unable to connect to the server");
             }
         },
+
+        // ── Category Requests ─────────────────────────────────
+        async fetchCategoryRequest() {
+            try {
+                const response = await fetch('/api/category/request', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
+                const result = await response.json();
+                if (!response.ok) {
+                    this.errorMessage = result.message || "Error fetching category requests";
+                } else {
+                    this.categoryRequest = result.category_request;
+                }
+            } catch (error) {
+                this.errorMessage = "Unable to connect to the server";
+            }
+        },
+
+        async approveCategoryRequest(id) {
+            try {
+                const response = await fetch(`/api/category/request/action`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        request_id: id,
+                        action: 'APPROVE',
+                    }),
+                });
+                const result = await response.json();
+                if (!response.ok) {
+                    this.errorMessage = result.message || "Error approving category request";
+                } else {
+                    alert("Category request approved successfully");
+                    this.fetchCategoryRequest();
+                    this.fetchCategories();
+                }
+            } catch (error) {
+                this.errorMessage = "Unable to connect to the server";
+            }
+        },
+
+        async rejectCategoryRequest(id) {
+            try {
+                const response = await fetch(`/api/category/request/action`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        request_id: id,
+                        action: 'REJECT',
+                    }),
+                });
+                const result = await response.json();
+                if (!response.ok) {
+                    this.errorMessage = result.message || "Error rejecting category request";
+                } else {
+                    alert("Category request rejected successfully");
+                    this.fetchCategoryRequest();
+                }
+            } catch (error) {
+                this.errorMessage = "Unable to connect to the server";
+            }
+        },
     },
+
     mounted() {
         this.fetchManagers();
         this.fetchCategories();

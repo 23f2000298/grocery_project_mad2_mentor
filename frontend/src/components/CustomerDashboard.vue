@@ -29,6 +29,9 @@
                 <div class="card">
                     <div class="card-header">All Products</div>
                     <div class="card-body">
+                        <div class = "input-group mb-3">
+                            <input type = "text" class = "form-control" placeholder="Search by name or description" v-model="searchText">
+                        </div>
                         <table class="table">
                             <table v-if = "allProducts.length > 0" class="table">
                             <thead>
@@ -84,6 +87,11 @@
             };
             
         },
+        computed:{
+            filteredProducts(){
+                
+            }
+        }
         methods:{
             async logout() {
                 localStorage.removeItem('token');
