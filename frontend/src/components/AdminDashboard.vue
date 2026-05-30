@@ -102,7 +102,7 @@
             <div class="col-md-10">
                 <div class="card">
                     <div class="card-header">Category Requests</div>
-                    <div class="card-body">
+                    <div class="card-body book">
                         <table class="table">
                             <thead>
                                 <tr>
@@ -320,3 +320,21 @@ export default {
     },
 }
 </script>
+
+<style>
+    .book {
+        margin:10px;
+        border:1px solid #add;
+        padding :15px;
+        border-radius:4px;
+        box-shadow:0 2px 4px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+        cursor:pointer;
+        overflow:hidden;
+        position:relative;
+        width:max-width;
+        height: 300px;
+        background-size:cover;
+
+    }
+</style>

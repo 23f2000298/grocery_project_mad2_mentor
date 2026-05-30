@@ -33,7 +33,7 @@
                             <input type = "text" class = "form-control" placeholder="Search by name or description" v-model="searchText">
                         </div>
                         <table class="table">
-                            <table v-if = "allProducts.length > 0" class="table">
+                            <table v-if = "filteredProducts.length > 0" class="table">
                             <thead>
                                 <tr>
                                     <th>ID</th>
@@ -47,7 +47,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="product in allProducts" :key="product.id">
+                                <tr v-for="product in filteredProducts" :key="product.id">
                                     <td>{{ product.id }}</td>
                                     <td>{{ product.name }}</td>
                                     <td>{{ product.price }}</td>
@@ -83,15 +83,22 @@
                 cartItems: [],
                 cartTotal: 0,
                 selectCategory: '',
+                searchText: '',
+ 
 
             };
             
         },
         computed:{
             filteredProducts(){
+                let products = this.allProducts;
+                if(this.searchText){
+                    products = products.filter(product => product.name.toLowerCase().includes(this.searchText.toLowerCase()) || product.description.toLowerCase().includes(this.searchText.toLowerCase()));
+                }
+                return products;
                 
             }
-        }
+        },
         methods:{
             async logout() {
                 localStorage.removeItem('token');
